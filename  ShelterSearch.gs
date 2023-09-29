@@ -60,6 +60,42 @@ function doPost(e) {
     });
   }
 
+  var messageType = '';
+ // メッセージのタイプを特定
+  if (json.events[0].type === 'message' && json.events[0].message.type === 'text') {
+    var userMessage = json.events[0].message.text;
+    // メッセージの内容に応じて messageType を設定
+    if (userMessage === '屋内') {
+      messageType = '屋内';
+    } else if (userMessage === '屋外') {
+      messageType = '屋外';
+    } else {
+      messageType = 'わからない';
+    }
+
+    var quickReplies = createQuickReplies(messageType);
+
+
+    // LINEにメッセージを送信
+    UrlFetchApp.fetch(LINE_REPLY_URL, {
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ' + LINE_BOT_CHANNEL_ACCESS_TOKEN,
+      },
+      method: 'post',
+      payload: JSON.stringify({
+        replyToken: replyToken,
+        messages: [{
+            type: 'text',
+            text: '今いる場所に近いものを選んでください',
+            quickReply: {
+              items: quickReplies
+            },
+        }]
+      }),
+    });
+  }
+
   return ContentService.createTextOutput(JSON.stringify({ content: 'post ok' })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -151,6 +187,229 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 function deg2rad(deg) {
   return deg * (Math.PI / 180);
+}
+
+
+function createQuickReplies(messageType) {
+  // クイックリプライを作成
+  var quickReplies = [];
+
+  if (messageType === '屋内') {
+    quickReplies.push(
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "自宅",
+          "text": "自宅"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "エレベーター",
+          "text": "エレベーター"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "施設",
+          "text": "施設"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "劇場ホール",
+          "text": "劇場ホール"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "地下道",
+          "text": "地下道"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "この中に無い",
+          "text": "この中に無い"
+        }
+      }
+      // 他の屋内オプションを追加
+    );
+  } else if (messageType === '屋外') {
+    quickReplies.push(
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "路上",
+          "text": "路上"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "車",
+          "text": "車"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "公共交通機関",
+          "text": "公共交通機関"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "海岸",
+          "text": "海岸"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "山の中",
+          "text": "山の中"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "山の近く",
+          "text": "山の近く"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "この中に無い",
+          "text": "この中に無い"
+        }
+      }
+      // 他の屋外オプションを追加
+    );
+  } else {
+    // わからない場合
+    quickReplies.push(
+       {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "自宅",
+          "text": "自宅"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "エレベーター",
+          "text": "エレベーター"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "施設",
+          "text": "施設"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "劇場ホール",
+          "text": "劇場ホール"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "地下道",
+          "text": "地下道"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "路上",
+          "text": "路上"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "車",
+          "text": "車"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "公共交通機関",
+          "text": "公共交通機関"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "海岸",
+          "text": "海岸"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "山の中",
+          "text": "山の中"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "山の近く",
+          "text": "山の近く"
+        }
+      },
+      {
+        "type": "action",
+        "action": {
+          "type": "message",
+          "label": "この中に無い",
+          "text": "この中に無い"
+        }
+      }
+      // 他のわからないオプションを追加
+    );
+  }
+
+  return quickReplies;
 }
 
 
