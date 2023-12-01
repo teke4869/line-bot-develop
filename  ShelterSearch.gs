@@ -1,10 +1,10 @@
 // LINE BOTの設定
-var LINE_BOT_CHANNEL_ACCESS_TOKEN = '';
+var LINE_BOT_CHANNEL_ACCESS_TOKEN = '1pTIotgCiIQQ2sEEukAyrzYTolG1IH22YrvIvffBXGT3lVSpcMKrVIV8wKshdg6KZzV0zu5+XQLO8FniJdjBDIjJyTaYdoWloi+u4E1U00zUf0/0ww3sX9nZjt9o5RaB6yk+WvMTZT5ouAeE7oH0BgdB04t89/1O/w1cDnyilFU=';
 var LINE_REPLY_URL = 'https://api.line.me/v2/bot/message/reply';
 
 // Google Maps Geocoding APIの設定
 var GOOGLE_MAPS_GEOCODING_ENDPOINT = 'https://maps.googleapis.com/maps/api/geocode/json';
-var API_KEY = '';
+var API_KEY = 'AIzaSyCfHV9FggOdJYU_MpghBygjZoPocVJ6a5c';
 
 // Google Places APIの設定
 var GOOGLE_PLACES_ENDPOINT = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json';
@@ -136,10 +136,6 @@ function doPost(e) {
         }),
       });
     }
-
-    
-
-
     // LINEにメッセージを送信
     UrlFetchApp.fetch(LINE_REPLY_URL, {
       headers: {
@@ -160,6 +156,9 @@ function doPost(e) {
     });
   }
 
+
+
+
   if (json.events[0].type === 'message' && json.events[0].message.type === 'text') {
     // クイックリプライに応じてメッセージを送信
     var ToDo = handleQuickReply(json.events[0].message.text);
@@ -177,13 +176,6 @@ function doPost(e) {
   });
   }
 
-  const quakes = getEarthQuakes2();
-  if (!quakes) {
-    return;
-  }
-
-  const message = quakes.join('\n'); // 地震情報を改行区切りのメッセージに変換
-  sendToLine(message); // メッセージをLINEに送信
 
   return ContentService.createTextOutput(JSON.stringify({ content: 'post ok' })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -201,7 +193,7 @@ function checkIfNearCoastAndHarbor(latitude, longitude) {
 
 function searchNearbyTsunamiShelters(latitude, longitude) {
   // 5km以内の津波避難場所またはビルを検索
-  var placesUrl = `${GOOGLE_PLACES_ENDPOINT}?location=${latitude},${longitude}&rankby=distance&keyword=中学校 OR 小学校 OR 高校 OR 高台&language=ja&key=${API_KEY}`;
+  var placesUrl = `${GOOGLE_PLACES_ENDPOINT}?location=${latitude},${longitude}&rankby=distance&keyword=津波避難所OR学校OR津波避難ビル&language=ja&key=${API_KEY}`;
   
   var placesResponse = UrlFetchApp.fetch(placesUrl);
   var placesData = JSON.parse(placesResponse.getContentText());
@@ -221,13 +213,15 @@ function searchNearbyShelters(latitude, longitude) {
 
 function searchNearbySchools(latitude, longitude) {
   // 3km以内の学校または避難所を検索
-  var placesUrl = `${GOOGLE_PLACES_ENDPOINT}?location=${latitude},${longitude}&rankby=distance&keyword=小学校OR中学校OR高校&language=ja&key=${API_KEY}`;
+  var placesUrl = `${GOOGLE_PLACES_ENDPOINT}?location=${latitude},${longitude}&rankby=distance&keyword=中学校 OR 小学校 OR 高校 OR 高台 OR 工業高校 OR 高等専門学校 OR 図書館 OR 情報制御工学科棟 OR 大学&language=ja&key=${API_KEY}`;
   
   var placesResponse = UrlFetchApp.fetch(placesUrl);
   var placesData = JSON.parse(placesResponse.getContentText());
   
   return placesData.results;
 }
+
+
 
 function searchNearbySchollOrShelters(latitude, longitude) {
   // 3km以内の学校または避難所を検索
@@ -349,8 +343,8 @@ function createQuickReplies(messageType) {
         "type": "action",
         "action": {
           "type": "message",
-          "label": "車",
-          "text": "車"
+          "label": "車内",
+          "text": "車内"
         }
       },
       {
@@ -375,14 +369,6 @@ function createQuickReplies(messageType) {
           "type": "message",
           "label": "山の中",
           "text": "山の中"
-        }
-      },
-      {
-        "type": "action",
-        "action": {
-          "type": "message",
-          "label": "山の近く",
-          "text": "山の近く"
         }
       },
       {
@@ -450,8 +436,8 @@ function createQuickReplies(messageType) {
         "type": "action",
         "action": {
           "type": "message",
-          "label": "車",
-          "text": "車"
+          "label": "車内",
+          "text": "車内"
         }
       },
       {
@@ -482,14 +468,6 @@ function createQuickReplies(messageType) {
         "type": "action",
         "action": {
           "type": "message",
-          "label": "山の近く",
-          "text": "山の近く"
-        }
-      },
-      {
-        "type": "action",
-        "action": {
-          "type": "message",
           "label": "この中に無い",
           "text": "この中に無い"
         }
@@ -501,6 +479,7 @@ function createQuickReplies(messageType) {
   return quickReplies;
 }
 
+
 function handleQuickReply(quickReplyText) {
   // クイックリプライに応じてメッセージを送信する関数
   var replyMessages = [];
@@ -511,42 +490,39 @@ function handleQuickReply(quickReplyText) {
       replyMessages.push({ type: 'text', text: '【自宅】\n\n①家具や落下物に注意する\n\n②頭を守る\n\n③ドアを開け脱出経路を確保\n\n④火元を確認する\n\n⑤屋外に出る\n\n⑥現在の地震の状況を確認する' });
       break;
     case 'エレベーター':
-      replyMessages.push({ type: 'text', text: '【エレベーターの中】\n\n①全ての階のボタンを押す\n\n[エレベーターから出られた場合]\n・落下物に注意しつつ屋外に出る\n・倒壊や落下物から安全を確保する\n・地震の情報を確認する\n\n[閉じ込められた場合]\n・非常ボタンを押す\n・外部と連絡を取る\n・相手からの指示に従う ' });
+      replyMessages.push({ type: 'text', text: '【エレベーターの中】\n\n①全ての階のボタンを押す\n\n②[閉じ込められた場合]\n\n・非常ボタンを押す\n\n・外部と連絡を取る\n\n・相手からの指示に従う \n\n③[エレベーターから出られた場合]\n\n・落下物に注意しつつ屋外に出る\n\n・倒壊や落下物から安全を確保する\n\n・地震の情報を確認する\n\n④[下への経路が断たれた場合]\n\n・救助隊(119)に連絡を取る\n\n・救助隊の指示の従う' });
       break;
     case '施設':
-      replyMessages.push({ type: 'text', text: '【施設】\n\n①落下物などに注意する\n\n②荷物などで頭を守る\n\n③柱や壁の近くに行く\n\n[下への経路が断たれた場合]\n・救助隊に連絡を取る\n・救助隊の指示の従う' });
+      replyMessages.push({ type: 'text', text: '【施設】\n\n①落下物などに注意する\n\n②荷物などで頭を守る\n\n③柱や壁の近くに行く\n\n④[避難経路が断たれた場合]\n\n・救助隊に連絡を取る\n\n・救助隊の指示の従う' });
       break;
     case '劇場ホール':
-      replyMessages.push({ type: 'text', text: '【劇場ホール】\n\n①頭上の安全を確保する\n\n②頭上が安全な場所でうずくまる\n\n③荷物などで頭を守る\n\n④係員の指示があるまで待つ\n\n⑤指示があったら冷静に行動する\n\n⑥倒壊や落下物から安全を確保する\n\n⑦現在の地震の状況を確認する\n\n[下への経路が断たれた場合]\n・救助隊に連絡を取る\n・救助隊の指示の従う' });
+      replyMessages.push({ type: 'text', text: '【劇場ホール】\n\n①頭上の安全を確保する\n\n②頭上が安全な場所でうずくまる\n\n③荷物などで頭を守る\n\n④係員の指示があるまで待つ\n\n⑤指示があったら冷静に行動する\n\n⑥倒壊や落下物から安全を確保する\n\n⑦現在の地震の状況を確認する\n\n⑧[避難経路が断たれた場合]\n\n・救助隊(119)に連絡を取る\n\n・救助隊の指示の従う' });
       break;
     case '地下道':
       replyMessages.push({ type: 'text', text: '【地下道】\n\n①荷物などで頭を守る\n\n②壁や柱の近くによる\n\n③慌てず地下道の出口に向かう\n\n④倒壊や落下物から安全を確保する\n\n⑤地震の情報を確認する\n\n⑥車での移動は避け避難所に行く' });
       break;
     case '路上':
-      replyMessages.push({ type: 'text', text: '【路上】\n\n①荷物などで頭を守る\n\n②周りを確認する\n\n③困っている人がいたら共に動く\n\n④広場などの開けた場所へ行く\n\n⑤倒壊や落下物から安全を確保する\n\n⑥石塀や自動販売機から離れる\n\n⑦橋を避ける\n\n⑧広場等の安全な場所に向かう\n\n⑨地震の情報を確認する' });
+      replyMessages.push({ type: 'text', text: '【路上】\n\n①荷物などで頭を守る\n\n②周りを確認する\n\n③困っている人がいたら共に動く\n\n④広場などの開けた場所へ向かって進む\n\n⑤倒壊や落下物から安全を確保する\n\n⑥石塀や自動販売機から離れる\n\n⑦橋は避ける\n\n⑨地震の情報を確認する' });
       break;
     case '車内':
-      replyMessages.push({ type: 'text', text: '【車内】\n\n①減速し路肩に停車する\n\n②停車後、地震の情報を確認する\n\n[避難が必要な場合]\n\n③車の窓を開ける\n\n④エンジンを切る\n\n⑤車検証、貴重品を持つ\n\n⑥キーをつけたまま外に出る\n\n⑦車での移動は避け避難所に行く' });
+      replyMessages.push({ type: 'text', text: '【車内】\n\n①減速し路肩に停車する\n\n②停車後、地震の情報を確認する\n\n[車を放置して避難する場合]\n\n③車の窓を開ける\n\n④エンジンを切る\n\n⑤車検証、貴重品を持つ\n\n⑥キーをつけたまま外に出る\n\n⑦混雑が見込まれる場合は、売るまでの移動は避け、避難所に行く' });
       break;
     case '公共交通機関':
-      replyMessages.push({ type: 'text', text: '【公共交通機関】\n\n①荷物などで頭を守る\n\n②係員のからの指示に従う\n\n③安全場所についたら状況を確認\n\n④車での移動は避け避難所に行く' });
+      replyMessages.push({ type: 'text', text: '【公共交通機関】\n\n①荷物などで頭を守る\n\n②係員からの指示に従う\n\n③安全な場所で現在の状況を確認\n\n④車での移動は避け避難所に行く' });
       break;
     case '海岸':
-      replyMessages.push({ type: 'text', text: '【海岸】\n\n①靴を履く\n\n②いち早く高台に逃げる\n\n③海や崖には行かない、戻らない\n\n④安全な場所で現在の状況を確認\n\n⑤津波の危険がないことを確認\n\n⑥車での移動は避け避難所に行く' });
+      replyMessages.push({ type: 'text', text: '【海岸】\n\n①いち早く高台に逃げる\n\n②海や崖には行かない、戻らない\n\n③安全な場所で現在の状況を確認\n\n④津波の危険がないことを確認\n\n⑤車での移動は避け避難所に行く' });
       break;
     case '山の中':
-      replyMessages.push({ type: 'text', text: '【山間】\n\n①姿勢を低くする\n\n②荷物などで頭を守る\n\n③急いで下山をしない\n\n④安全を確保し様子を見る\n\n⑤危険な道は避け下山する\n\n⑥登山口まで戻る\n\n⑦現在の地震の状況を確認する\n\n⑧車での移動は避け避難所に行く' });
+      replyMessages.push({ type: 'text', text: '【山の中】\n\n①姿勢を低くする\n\n②荷物などで頭を守る\n\n③急いで下山をしない\n\n④安全を確保し様子を見る\n\n⑤危険な道は避け下山する\n\n⑥登山口まで戻る\n\n⑦現在の地震の状況を確認する\n\n⑧車での移動は避け避難所に行く' });
       break;
-    case '山の近く':
-      replyMessages.push({ type: 'text', text: '【山の近く】\n\n①荷物などで頭を守る\n\n②倒壊等の危険がない場所へ行く\n\n③現在の地震の状況を確認する\n\n④車での移動は避け避難所に行く' });
-      break;
-    case 'このこの中にない場合':
+    case 'この中に無い':
       replyMessages.push({ type: 'text', text: '【この中に無いと回答した場合】\n\n①荷物などで頭を守る\n\n②倒壊等の危険がない場所へ行く\n\n③現在の地震の状況を確認する\n\n④車での移動は避け避難所に行く' });
       break;
     
     // 他のクイックリプライに対する処理を追加
     default:
-      replyMessages.push({ type: 'text', text: '選択されたオプションに対するメッセージがありません' });
+      replyMessages.push({ type: 'text13', text: '選択されたオプションに対するメッセージがありません' });
   }
   return replyMessages
 }
@@ -590,83 +566,111 @@ function createCarouselMessage(results,userLatitude,userLongitude) {
   return message;
 }
 
-// 地震情報取得
-function getEarthQuakes2() {
-  // ネームスペース
-  const atom = XmlService.getNamespace('', 'http://www.w3.org/2005/Atom');
-  const seismology1 = XmlService.getNamespace('', 'http://xml.kishou.go.jp/jmaxml1/body/seismology1/');
 
-  // コンテンツ取得
-  const res = UrlFetchApp.fetch('https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml');
-  const xml = XmlService.parse(res.getContentText());
-  const root = xml.getRootElement();
-  const entries = root.getChildren('entry', atom);
-  const earthQuakeContents = entries.filter((entry) => {
-    const content = entry.getChildText('content', atom);
-    return /震度情報/.test(content);
-  });
-
-  // 地震がない時
-  if (!earthQuakeContents?.length) {
-    return null;
-  }
-
-  const targetEarthQuakes = earthQuakeContents.map((e) => {
-    // 対象地震詳細情報取得
-    const link = e.getChild('link', atom).getAttribute('href').getValue();
-    const res = UrlFetchApp.fetch(link);
-    const xml = XmlService.parse(res.getContentText());
-    const root = xml.getRootElement();
-    const bodies = root.getChildren('Body', seismology1);
-    const earthQuake = bodies[0].getChild('Earthquake', seismology1);
-    const intensity = bodies[0].getChild('Intensity', seismology1);
-
-    // 発生時刻
-    const originTime = earthQuake?.getChildText('OriginTime', seismology1);
-    // 発生場所
-    const areaName = earthQuake?.getChild('Hypocenter', seismology1).getChild('Area', seismology1).getChildText('Name', seismology1);
-    // 震度
-    const maxInt = intensity?.getChild('Observation', seismology1).getChildText('MaxInt', seismology1);
-
-    // 「発生時刻・発生場所・震度」がなければreturn
-    if (!earthQuake || !intensity) {
-      return null;
-    }
-
-    return [
-      '発生時刻：' + originTime + '　' +
-      '震源地：' + areaName + '　' +
-      '震度:' + maxInt,
-    ];
-  }).filter((e) => e);
-
-  return targetEarthQuakes;
+/**
+* スプレッドシートから前回のスクリプト実行時間を取得する
+*/
+function getTimeLog (timeLogCell,timeFormat){
+ let preExcuteTime = ''
+ if (!timeLogCell.isBlank()) {
+   preExcuteTime = timeFormat(timeLogCell.getValue())
+ }
+ return preExcuteTime
 }
 
-// LINEにメッセージを送信
-function sendToLine(message) {
-  const accessToken = 'LINE_BOT_CHANNEL_ACCESS_TOKEN'; // LINE Messaging APIのアクセストークンをここに設定
+/**
+* XMLのURLを元にルート要素を探して返す
+*/
+function findXmlRoot (url){
+ const response = UrlFetchApp.fetch(url).getContentText()
+ return XmlService.parse(response).getRootElement()
+}
 
-  const headers = {
-    'Authorization': 'Bearer ' + accessToken,
-    'Content-Type': 'application/json',
-  };
+/**
+* 引数のelementの配下で引数のtagNameと一致する要素を配列で返す
+*/
+function getElementsByTagName(element, tagName){
+ const data = []
+ const children = element.getDescendants()
+ for (let i = 0; i < children.length; i++) {
+   const elem = children[i].asElement()
+   if (elem != null && elem.getName() == tagName) {
+     data.push(elem)
+   } 
+ }
+ return data;
+}
+
+/**
+* 地震情報を取得し、条件に合格した際にはLINEに通知する
+*/
+function earthNotify(){
+  const timeFormat = (date) => Utilities.formatDate(date, 'JST', "yyyy-MM-dd HH:mm:ss")
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('シート1')
+  const now = timeFormat(new Date())
+  const timeLogCell = sheet.getRange('A2')
+  const namespace = XmlService.getNamespace('http://www.w3.org/2005/Atom');
+  const feedUrl = 'http://www.data.jma.go.jp/developer/xml/feed/eqvol.xml' // 気象庁の情報サイト
+  const feedRoot = findXmlRoot(feedUrl)
+  const entries = getElementsByTagName(feedRoot, 'entry')
+  const message1 = '【　地震速報　】\n'
+  const message2 = '震度3以上の地震がありました。\n'
+  const message3 = '位置情報を送信してください。'
+  const nameList = [];
+
+  for (let i = 0; i < entries.length; i++) {
+    const title = entries[i].getChild('title', namespace).getText()
+    if (title !== '震度速報') continue
+
+    const link = entries[i].getChild('link', namespace).getAttribute('href').getValue()
+    const newsRoot = findXmlRoot(link)
+    const items = getElementsByTagName(newsRoot, 'Item')
+    const targetDateTime = getElementsByTagName(newsRoot, 'TargetDateTime')[0].getValue()
+
+    for (let j = 0; j < items.length; j++) {
+      // 震度3以上、かつ前回のスクリプト実行以降に更新された情報なら、LINEに最新情報として通知
+      if (items[j].getValue().match(/震度[３-９]/) !== null 
+        && new Date(targetDateTime) > new Date(getTimeLog(timeLogCell,timeFormat))) {
+          const nameElements = getElementsByTagName(items[j], 'Name');
+          for(let k=0; k<nameElements.length; k++){
+            nameList.push(nameElements[k].getValue());
+          }
+          timeLogCell.setValue(now)
+
+      }
+    }
+  }
+  if(nameList.length > 0){
+    const message = message1 + message2 + ('\n') + nameList.join('\n') + ('\n') + ('\n') + message3;
+    sendInfoToLine(message);
+  }
+}
+
+
+function usenotify(){
+  const use_message = '【　運営からお知らせ　】\n\nこんにちは！\n運営からお知らせです！\n\nユーザーのみなさん!\n防災対策はしていますか？\n\n「避難所表示」と「ToDoリスト」は平常時にも使用できます！\n防災対策に活かしてください！'
+  sendInfoToLine(use_message); 
+}
+
+
+function sendInfoToLine(text1){
+  const url = 'https://api.line.me/v2/bot/message/broadcast';
+  const token = LINE_BOT_CHANNEL_ACCESS_TOKEN; //ここにチャネルアクセストークン入れる
 
   const payload = {
-    replyToken:replyToken, // 通知を受け取るLINEユーザーのIDに置き換え
     messages: [
-      {
-        type: 'text',
-        text: message,
-      },
-    ],
+      { type: 'text', text: text1 }
+    ]
   };
 
-  const options = {
+  const params = {
     method: 'post',
-    headers: headers,
-    payload: JSON.stringify(payload),
+    contentType: 'application/json',
+    headers: {
+      Authorization: 'Bearer ' + token
+    },
+    payload: JSON.stringify(payload)
   };
 
-  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', options);
+  UrlFetchApp.fetch(url, params);
 }
